@@ -1,0 +1,95 @@
+---
+title: "EB Client: Browser-Based Minecraft Without an Install"
+sidebarTitle: "Introduction"
+description: "EB Client is an offline-capable, browser-based Minecraft 1.8 client powered by EaglercraftX and Wispcraft, requiring zero installation to play on Java servers."
+---
+
+EB Client is a fully self-contained Minecraft 1.8 experience that runs entirely inside your web browser — no launcher, no Java runtime, and no installation required. Built on top of EaglercraftX and augmented with Wispcraft for network proxying, it lets you connect to real Java Minecraft servers from any modern browser that supports WebAssembly. The project ships in two forms — a single offline HTML file and a multi-file web bundle — so you can run it locally, host it yourself, or embed it in an existing site.
+
+## What Powers EB Client
+
+EB Client is not a monolith. It is the combination of two separate open-source technologies assembled into one distributable client.
+
+<CardGroup cols={2}>
+  <Card title="EaglercraftX" icon="microchip">
+    The core Minecraft 1.8 engine, ported to WebAssembly by **lax1dude**. EaglercraftX compiles the original game logic to WASM so it executes at near-native speed inside V8, SpiderMonkey, or any standards-compliant JS engine. It handles rendering, world simulation, chat, and all gameplay mechanics.
+  </Card>
+  <Card title="Wispcraft" icon="plug">
+    The networking layer that makes real server connections possible from inside a browser sandbox. Wispcraft implements the **WISP protocol**, tunneling raw TCP traffic to Java Minecraft servers over a WebSocket connection to a WISP proxy. Without Wispcraft, the browser's security model would block direct TCP connections entirely.
+  </Card>
+</CardGroup>
+
+## How Server Connections Work
+
+Because browsers cannot open raw TCP sockets, EB Client routes all game traffic through a WISP proxy server. The flow looks like this:
+
+```
+Browser (EB Client)  →  WebSocket  →  WISP Proxy  →  TCP  →  Java Minecraft Server
+```
+
+When you enter a server address in the multiplayer menu you use the `java://` scheme to target a Java server through your configured WISP proxy:
+
+```
+java://play.example.net:25565
+```
+
+Eaglercraft relay servers (which speak the native Eaglercraft protocol) are addressed directly with a secure WebSocket URL instead:
+
+```
+wss://relay.deev.is/
+```
+
+The client ships with a default public WISP endpoint pre-configured, so most users can connect to Java servers immediately without touching any settings.
+
+## Distribution Formats
+
+EB Client is available in two equivalent forms. Both contain identical game code; only the delivery mechanism differs.
+
+<CardGroup cols={2}>
+  <Card title="Offline HTML File" icon="file-code">
+    A **single `.html` file** that bundles the entire client — engine, assets, and networking — into one self-contained document. Download it once and open it directly in your browser with no internet connection required after that. Ideal for portable use (USB drive, local disk) or anywhere you cannot run a web server.
+  </Card>
+  <Card title="Web File Bundle" icon="server">
+    A **folder of four files** — `index.html`, `bootstrap.js`, `assets.epw`, and `favicon.png` — designed to be served from a web server or static hosting provider. The split format allows browsers to cache the large `assets.epw` asset pack separately, making repeat loads significantly faster than reloading the monolithic HTML file.
+  </Card>
+</CardGroup>
+
+<Note>
+  Both distribution formats are kept in sync. Every Nextgen Cumulative Update ships both an offline HTML download and a matching web file bundle, so you can switch between them at any time without losing any features.
+</Note>
+
+## Nextgen vs. Legacy
+
+The archive contains two distinct build lines: **Nextgen** and **Legacy**.
+
+| Build Line | Status | Performance | Motion Blur |
+|---|---|---|---|
+| **Nextgen** (CU3 – CU7) | ✅ Actively developed | Faster ("lite" renderer) | No |
+| **Legacy** | ❌ No longer developed | Slower | Yes |
+
+<Warning>
+  Avoid the Legacy build unless you specifically want motion blur. It performs worse than the Nextgen "lite" renderer and receives no further updates. All new features, bug fixes, and security improvements are exclusive to the Nextgen line.
+</Warning>
+
+The current latest release is **EB Client Nextgen CU7**. All new users should start here.
+
+## Built-in Eaglercraft Relays
+
+EB Client includes three community relay servers pre-configured for Eaglercraft protocol connections. You can use any of them without additional setup:
+
+| Relay | Address | Operator |
+|---|---|---|
+| lax1dude relay #1 | `wss://relay.deev.is/` | lax1dude |
+| lax1dude relay #2 | `wss://relay.lax1dude.net/` | lax1dude |
+| ayunami relay #1 | `wss://relay.shhnowisnottheti.me/` | ayunami |
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get EB Client running in your browser in under five minutes, step by step.
+  </Card>
+  <Card title="Versions" icon="list" href="/versions">
+    Browse the full Nextgen release history from CU3 through CU7.
+  </Card>
+</CardGroup>

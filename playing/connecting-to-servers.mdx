@@ -1,0 +1,145 @@
+---
+title: "Connect to Java and Eaglercraft servers in EB Client"
+sidebarTitle: "Servers"
+description: "Learn how to connect to Java Minecraft servers using the java:// prefix and Eaglercraft relay servers using wss://, with built-in relays and WISP tunneling explained."
+---
+
+EB Client supports two distinct server types: standard Java Edition Minecraft servers tunneled through the WISP protocol, and Eaglercraft relay servers that speak the native Eaglercraft WebSocket protocol. Both connection types are entered in the same multiplayer server address field — the prefix you use tells the client which path to take.
+
+<Tabs>
+  <Tab title="Java Minecraft Servers">
+    ## Connecting to a Java Edition Server
+
+    Java Edition servers are reached by prefixing the server address with `java://`. EB Client passes this connection through **Wispcraft**, which uses the [WISP protocol](https://github.com/MercuryWorkshop/wisp-protocol) to tunnel a TCP/TLS connection over a WebSocket to the configured WISP server. The remote Minecraft server sees a normal Java Edition client — no plugins or server-side modifications are required.
+
+    <Tip>
+      Any standard Java Edition 1.8 server works out of the box. The server operator does not need to install anything special — all the tunneling happens transparently on the client side via WISP.
+    </Tip>
+
+    ### Address Format
+
+    ```
+    java://<host>:<port>
+    ```
+
+    The port is optional when connecting to servers running on the default port (`25565`).
+
+    ### Examples
+
+    ```text
+    java://mc.hypixel.net:25565
+    java://play.mineplex.com:25565
+    java://my.private-server.net:19132
+    ```
+
+    ### Steps to Connect
+
+    <Steps>
+      <Step title="Open Multiplayer">
+        From the main menu, click **Multiplayer** to open the server list.
+      </Step>
+      <Step title="Add a Server">
+        Click **Add Server** and enter a name for the server in the *Server Name* field.
+      </Step>
+      <Step title="Enter the Address">
+        In the *Server Address* field, type your server address with the `java://` prefix:
+
+        ```text
+        java://mc.hypixel.net:25565
+        ```
+      </Step>
+      <Step title="Save and Connect">
+        Click **Done** to save the entry, then select it from the list and click **Join Server**.
+      </Step>
+    </Steps>
+
+    ### How WISP Works
+
+    When you connect to a `java://` address, Wispcraft opens a WebSocket connection to the configured WISP server URL and negotiates a WISP tunnel for the target TCP host and port. The WISP server acts as a relay between your browser and the Minecraft server, forwarding raw TCP traffic in both directions. This happens entirely within the browser — no native application or browser extension is needed.
+
+    <Note>
+      The WISP server URL can be changed in the [Wispcraft settings panel](/playing/settings). By default it is set to the value of `window.DEFAULT_WISP_URL`.
+    </Note>
+  </Tab>
+
+  <Tab title="Eaglercraft Relay Servers">
+    ## Connecting to an Eaglercraft Server
+
+    Eaglercraft servers use a WebSocket-based relay system. Enter a relay address starting with `wss://` (secure WebSocket) directly into the server address field. No WISP tunneling is involved — the client speaks the Eaglercraft protocol directly to the relay.
+
+    ### Address Format
+
+    ```
+    wss://<relay-host>/
+    ```
+
+    ### Examples
+
+    ```text
+    wss://relay.deev.is/
+    wss://relay.lax1dude.net/
+    wss://relay.shhnowisnottheti.me/
+    ```
+
+    ### Steps to Connect
+
+    <Steps>
+      <Step title="Open Multiplayer">
+        From the main menu, click **Multiplayer**.
+      </Step>
+      <Step title="Add a Server">
+        Click **Add Server** and give it a recognizable name.
+      </Step>
+      <Step title="Enter the Relay Address">
+        In the *Server Address* field, enter the relay URL:
+
+        ```text
+        wss://relay.deev.is/
+        ```
+      </Step>
+      <Step title="Save and Connect">
+        Click **Done**, then select the entry and click **Join Server**.
+      </Step>
+    </Steps>
+
+    ### Built-in Relay Servers
+
+    EB Client ships with three pre-configured Eaglercraft relay servers. You can use these without any additional setup:
+
+    <CardGroup cols={1}>
+      <Card title="lax1dude relay #1" icon="signal">
+        ```text
+        wss://relay.deev.is/
+        ```
+        Operated by lax1dude. Primary relay recommended for most users.
+      </Card>
+      <Card title="lax1dude relay #2" icon="signal">
+        ```text
+        wss://relay.lax1dude.net/
+        ```
+        Operated by lax1dude. Secondary relay — useful if relay #1 is unreachable.
+      </Card>
+      <Card title="ayunami relay #1" icon="signal">
+        ```text
+        wss://relay.shhnowisnottheti.me/
+        ```
+        Operated by ayunami. An independent community-run alternative.
+      </Card>
+    </CardGroup>
+
+    <Warning>
+      Relay server availability depends on third-party operators. If a relay is down, try one of the other pre-configured options or ask a server administrator for their relay URL.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Quick Reference
+
+| Connection Type | Prefix | Example |
+|---|---|---|
+| Java Edition server | `java://` | `java://mc.hypixel.net:25565` |
+| Eaglercraft relay | `wss://` | `wss://relay.deev.is/` |
+
+<Tip>
+  The **About** tab in the [Wispcraft settings panel](/playing/settings) also displays a quick reminder of these prefixes any time you need them.
+</Tip>

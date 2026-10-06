@@ -1,0 +1,181 @@
+---
+title: "Set up a WISP server for EB Client Java connectivity"
+sidebarTitle: "WISP Server"
+description: "Run your own WISP WebSocket proxy so EB Client players can connect to standard Java Minecraft servers from restricted or private networks."
+---
+
+EB Client runs entirely in the browser, which means it cannot open raw TCP sockets to Java Minecraft servers directly. Instead, it tunnels all game traffic through a **WISP server** — a lightweight WebSocket proxy that speaks the open [Wisp protocol](https://github.com/MercuryWorkshop/wisp-protocol) defined by Mercury Workshop. The browser connects to the WISP server over a standard WebSocket, and the WISP server forwards TCP (and optionally TLS/UDP) streams to the destination Minecraft server on its behalf.
+
+## How WISP works
+
+```
+Browser (EB Client)  <──WebSocket──>  WISP Server  <──TCP──>  Java Minecraft Server
+```
+
+1. EB Client opens a single persistent WebSocket connection to the WISP endpoint.
+2. It multiplexes any number of Minecraft connections as individual WISP streams over that socket.
+3. The WISP server resolves hostnames, opens TCP connections to the game servers, and relays bytes bidirectionally.
+4. From the Minecraft server's perspective, the connection looks like a normal TCP client originating from the WISP server's IP address.
+
+Server addresses use a URI prefix to tell EB Client which transport to use:
+
+| Prefix | Meaning |
+|---|---|
+| `java://` | Standard Java Minecraft server (TCP via WISP) |
+| `wss://` | Eaglercraft WebSocket relay (direct browser WebSocket) |
+
+## Why you might need your own WISP server
+
+The default public WISP relay works for most players, but there are good reasons to self-host:
+
+- **Network restrictions** — school or workplace firewalls often block the public relay's domain or IP. Hosting your own WISP server on an allowed port (443, 8080, etc.) lets players bypass these restrictions.
+- **Performance** — a geographically closer WISP server reduces round-trip latency between the browser and the Minecraft server.
+- **Privacy** — the WISP server can see all proxied Minecraft traffic (see warning below). Running your own means you control who has visibility into that data.
+- **Reliability** — public relays are a shared resource. Your own instance gives you guaranteed uptime.
+
+<Warning>
+  Any WISP server you connect to can observe your Minecraft game traffic, including server addresses you connect to, chat messages, and authentication tokens. **Only connect to WISP servers you operate yourself or fully trust.** Never use an unfamiliar public WISP relay for servers where account security matters.
+</Warning>
+
+## WISP server implementations
+
+Three well-supported open-source implementations are available:
+
+<CardGroup cols={3}>
+  <Card title="wisp-server-node" icon="node-js" href="https://github.com/MercuryWorkshop/wisp-server-node">
+    Node.js implementation. Easy to deploy on any VPS with Node installed. Good choice for developers already in the JavaScript ecosystem.
+  </Card>
+  <Card title="wisp-server-go" icon="golang" href="https://github.com/MercuryWorkshop/wisp-server-go">
+    Go implementation. Compiles to a single binary with no runtime dependencies. Recommended for production servers that need low overhead.
+  </Card>
+  <Card title="epoxy-server" icon="rust" href="https://github.com/MercuryWorkshop/epoxy-tls">
+    Rust-based server from the Epoxy TLS project. Supports the full Epoxy feature set including WISP v2, UDP, and TLS extensions.
+  </Card>
+</CardGroup>
+
+## Deploying a WISP server
+
+The steps below use `wisp-server-node` as an example. Adapt the port and domain to your environment.
+
+<Steps>
+  <Step title="Install Node.js and clone the server">
+    ```bash
+    # Install Node.js 18+ if not already present
+    node --version
+
+    # Clone and install dependencies
+    git clone https://github.com/MercuryWorkshop/wisp-server-node
+    cd wisp-server-node
+    npm install
+    ```
+  </Step>
+  <Step title="Start the WISP server">
+    ```bash
+    # Listen on port 3000 (change as needed)
+    node server.js --port 3000
+    ```
+
+    The server will log its WebSocket endpoint, typically `ws://0.0.0.0:3000/`. For production, run it behind a reverse proxy (Nginx or Caddy) that terminates TLS, exposing a `wss://` URL.
+  </Step>
+  <Step title="(Optional) Reverse-proxy for TLS">
+    EB Client pages served over HTTPS require a secure (`wss://`) WISP connection. Add a WebSocket proxy pass in your Nginx or Caddy config:
+
+    <Tabs>
+      <Tab title="Nginx">
+        ```nginx
+        server {
+          listen 443 ssl;
+          server_name wisp.example.com;
+
+          # ... your SSL certificate directives ...
+
+          location / {
+            proxy_pass http://127.0.0.1:3000;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $host;
+            # Increase timeout for long-lived game connections
+            proxy_read_timeout 3600s;
+            proxy_send_timeout 3600s;
+          }
+        }
+        ```
+      </Tab>
+      <Tab title="Caddy">
+        ```caddyfile
+        wisp.example.com {
+          reverse_proxy localhost:3000 {
+            # Long-lived WebSocket connections
+            transport http {
+              keepalive 1h
+              keepalive_idle_conns 100
+            }
+          }
+        }
+        ```
+      </Tab>
+    </Tabs>
+
+    Your WISP endpoint is now `wss://wisp.example.com/`.
+  </Step>
+  <Step title="Point EB Client at your WISP server">
+    See the next section for how to configure EB Client to use the new endpoint.
+  </Step>
+</Steps>
+
+## Connecting EB Client to your WISP server
+
+There are three ways to configure which WISP server EB Client uses.
+
+### Option 1 — Edit the configuration before deployment (recommended)
+
+Set the `wispUrl` field in `eaglercraftXOpts` inside `index.html` before you serve the bundle. All players who load your page will use this endpoint automatically. See the [Configuration](/hosting/configuration) page for the full `eaglercraftXOpts` reference.
+
+```javascript
+window.eaglercraftXOpts = {
+  // ... other options ...
+  wispUrl: "wss://wisp.example.com/"
+};
+```
+
+### Option 2 — Change at runtime via the browser console
+
+The `window.setWispUrl()` global lets you switch the active WISP endpoint without reloading the page. Open the browser developer console on a running EB Client page and call:
+
+```javascript
+// Switch to a custom WISP server at runtime
+window.setWispUrl("wss://wisp.example.com/");
+
+// Inspect the built-in default for reference
+console.log("Default WISP URL:", window.DEFAULT_WISP_URL);
+```
+
+The change takes effect for the next connection attempt. Existing open streams continue through the previous server until they close.
+
+### Option 3 — Use the in-game settings UI
+
+Click the **Settings** button within the EB Client interface, or trigger the panel programmatically:
+
+```javascript
+window.showSettingsUI();
+```
+
+The Wispcraft settings panel lets users paste a custom WISP URL directly in the UI without touching the console. This is the recommended path for end-users who are not developers.
+
+## Verifying connectivity
+
+Once your WISP server is running and configured, verify end-to-end connectivity:
+
+1. Open EB Client in a browser.
+2. Open the browser developer console and run:
+   ```javascript
+   console.log(window.eaglercraftXOpts.wispUrl);
+   ```
+3. Confirm the URL matches your server.
+4. Attempt to connect to a Java Minecraft server from the in-game server list using the `java://` prefix, e.g. `java://mc.example.com:25565`.
+5. Check your WISP server logs for an incoming WebSocket connection and outbound TCP stream.
+
+<Tip>
+  Run `wisp-server-node` with the `DEBUG=*` environment variable to get verbose logs of every stream opened through the proxy — useful for confirming that EB Client traffic is reaching your server correctly.
+</Tip>

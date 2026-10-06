@@ -1,0 +1,163 @@
+---
+title: "EB Client Nextgen release history: CU3 to CU7"
+sidebarTitle: "Versions"
+description: "Full archive of every EB Client Nextgen Cumulative Update from CU3 to CU7, with status, available formats, and guidance on which version to use."
+---
+
+EB Client Nextgen follows a **Cumulative Update (CU)** release naming scheme. Each CU is a numbered increment that layers fixes, improvements, and new features on top of the previous release. The archive currently holds five Nextgen CUs — from CU3 through the current latest, CU7. Every CU is available in both distribution formats: a standalone offline HTML file and a deployable web file bundle.
+
+<Note>
+  **Always use CU7 for new deployments.** Older CUs remain in the archive strictly for compatibility testing, historical reference, and scenarios where a specific older behaviour is required.
+</Note>
+
+## Version Overview
+
+| Version | Status | Offline HTML | Web Bundle | Notes |
+|---|---|---|---|---|
+| **CU7** | ✅ **Latest** | `[LATEST] EB Client Nextgen CU7.html` | `Web Files/[LATEST] EB Client Nextgen CU7/` | Current recommended release |
+| CU6 | 🗄️ Archived | `Older Versions/[LATEST] EB Client Nextgen CU6.html` | `Web Files/Older Versions/EB Client Nextgen CU6/` | Previous stable release |
+| CU5 | 🗄️ Archived | `Older Versions/EB Client Nextgen CU5.html` | `Web Files/Older Versions/EB Client Nextgen CU5/` | — |
+| CU4 | 🗄️ Archived | `Older Versions/EB Client Nextgen CU4.html` | `Web Files/Older Versions/EB Client Nextgen CU4/` | — |
+| CU3 | 🗄️ Archived | `Older Versions/EB Client Nextgen CU3.html` | `Web Files/Older Versions/EB Client Nextgen CU3/` | Oldest Nextgen release in archive |
+
+## Release Details
+
+<CardGroup cols={1}>
+  <Card title="CU7 — Current Latest" icon="circle-check">
+    **Status:** Active · Recommended for all users
+
+    CU7 is the current head of the Nextgen line and the version that receives all ongoing development. It contains every improvement shipped across CU3–CU6, plus additional fixes and enhancements introduced in this release.
+
+    **Files:**
+    ```
+    Offline Downloads/[LATEST] EB Client Nextgen CU7.html
+
+    Web Files/[LATEST] EB Client Nextgen CU7/
+    ├── index.html
+    ├── bootstrap.js
+    ├── assets.epw
+    └── favicon.png
+    ```
+  </Card>
+
+  <Card title="CU6 — Previous Stable" icon="clock-rotate-left">
+    **Status:** Archived · No longer updated
+
+    CU6 was the previous latest release before CU7 shipped. It is functionally complete but does not include any fixes or features introduced in CU7. Use it only if you have a specific reason to pin to this version.
+
+    **Files:**
+    ```
+    Offline Downloads/Older Versions/[LATEST] EB Client Nextgen CU6.html
+
+    Web Files/Older Versions/EB Client Nextgen CU6/
+    ├── index.html
+    ├── bootstrap.js
+    ├── assets.epw
+    └── favicon.png
+    ```
+  </Card>
+
+  <Card title="CU5" icon="clock-rotate-left">
+    **Status:** Archived · No longer updated
+
+    CU5 is an earlier milestone in the Nextgen line. All improvements from CU5 are included in CU6 and CU7.
+
+    **Files:**
+    ```
+    Offline Downloads/Older Versions/EB Client Nextgen CU5.html
+
+    Web Files/Older Versions/EB Client Nextgen CU5/
+    ├── index.html
+    ├── bootstrap.js
+    ├── assets.epw
+    └── favicon.png
+    ```
+  </Card>
+
+  <Card title="CU4" icon="clock-rotate-left">
+    **Status:** Archived · No longer updated
+
+    CU4 is an early Nextgen release. It predates several rounds of refinement present in CU5 and later.
+
+    **Files:**
+    ```
+    Offline Downloads/Older Versions/EB Client Nextgen CU4.html
+
+    Web Files/Older Versions/EB Client Nextgen CU4/
+    ├── index.html
+    ├── bootstrap.js
+    ├── assets.epw
+    └── favicon.png
+    ```
+  </Card>
+
+  <Card title="CU3 — Oldest Archived Nextgen" icon="box-archive">
+    **Status:** Archived · No longer updated
+
+    CU3 is the earliest Nextgen release present in the archive. It represents the foundation of the Nextgen line before the cumulative improvements introduced across CU4–CU7.
+
+    **Files:**
+    ```
+    Offline Downloads/Older Versions/EB Client Nextgen CU3.html
+
+    Web Files/Older Versions/EB Client Nextgen CU3/
+    ├── index.html
+    ├── bootstrap.js
+    ├── assets.epw
+    └── favicon.png
+    ```
+  </Card>
+</CardGroup>
+
+## Archive Folder Structure
+
+Both distribution formats follow a predictable layout. The current latest always lives at the top level; every prior CU is nested inside an `Older Versions/` sub-folder.
+
+```
+Offline Downloads/
+├── [LATEST] EB Client Nextgen CU7.html       ← always the current release
+└── Older Versions/
+    ├── [LATEST] EB Client Nextgen CU6.html
+    ├── EB Client Nextgen CU5.html
+    ├── EB Client Nextgen CU4.html
+    └── EB Client Nextgen CU3.html
+
+Web Files/
+├── [LATEST] EB Client Nextgen CU7/           ← always the current release
+│   ├── index.html
+│   ├── bootstrap.js
+│   ├── assets.epw
+│   └── favicon.png
+└── Older Versions/
+    ├── EB Client Nextgen CU6/
+    ├── EB Client Nextgen CU5/
+    ├── EB Client Nextgen CU4/
+    └── EB Client Nextgen CU3/
+```
+
+## When to Use an Older Version
+
+<Tip>
+  **99% of users should use CU7.** The Nextgen line is cumulative — every fix and feature from earlier CUs is already present in the latest release.
+</Tip>
+
+Legitimate reasons to reach for an older CU:
+
+- **Compatibility testing** — reproducing a bug that was present in a specific version to verify it has been fixed in CU7.
+- **Pinned environments** — a hosted deployment that has been specifically tested against a particular CU and should not be upgraded mid-session.
+- **Historical reference** — understanding how a specific feature or UI element evolved across releases.
+
+## The Legacy Build
+
+The Legacy build is a separate, older client that predates the entire Nextgen line. It is **not** part of the CU versioning scheme and is not included in the CU3–CU7 archive.
+
+<Warning>
+  **Avoid the Legacy build** unless you specifically need motion blur. As stated in the project README: *"Avoid using the legacy version unless you really want motion blur, it performs worse than lite and is no longer developed."* The Nextgen "lite" renderer is faster in every measurable way, and the Legacy build receives no further fixes or updates.
+</Warning>
+
+| | Nextgen (CU3–CU7) | Legacy |
+|---|---|---|
+| Renderer | Lite (faster) | Legacy (slower) |
+| Motion blur | No | Yes |
+| Active development | ✅ Yes | ❌ No |
+| Recommended | ✅ Yes | ❌ No |

@@ -1,0 +1,284 @@
+---
+title: "Configure eaglercraftXOpts for a custom EB Client deployment"
+sidebarTitle: "Configuration"
+description: "Full reference for every eaglercraftXOpts field, relay and server objects, EpoxyClientOptions transport settings, and the window globals exposed by EB Client."
+---
+
+All EB Client behavior is controlled by the `window.eaglercraftXOpts` object defined in `index.html`. Setting this object before the page scripts run lets you pre-configure the WISP server, default server list, relay pool, asset location, and low-level transport options for every player who loads your deployment.
+
+This page documents every available field. For a general hosting overview see [Overview](/hosting/overview), and for WISP server setup see [WISP Server](/hosting/wisp-server).
+
+## Complete example configuration
+
+```javascript
+window.eaglercraftXOpts = {
+  // Core UI
+  container: "game_frame",
+  worldsDB: "worlds",
+
+  // Asset bundle location (relative or absolute URL)
+  assetsURI: "assets.epw",
+
+  // WISP proxy endpoint for Java server connectivity
+  wispUrl: "wss://wisp.example.com/",
+
+  // Eaglercraft WebSocket relays (for relay-mode servers)
+  relays: [
+    { addr: "wss://relay.deev.is/",             comment: "lax1dude relay #1",  primary: true  },
+    { addr: "wss://relay.lax1dude.net/",         comment: "lax1dude relay #2",  primary: false },
+    { addr: "wss://relay.shhnowisnottheti.me/",  comment: "ayunami relay #1",   primary: false }
+  ],
+
+  // Pre-populated servers (appear first in the in-game server list)
+  servers: [
+    { addr: "java://mc.example.com:25565", name: "My Server" }
+  ]
+};
+```
+
+---
+
+## eaglercraftXOpts fields
+
+### Core options
+
+<ParamField path="container" type="string" default="game_frame">
+  The `id` attribute of the DOM element that EB Client will mount the game canvas into. The element must exist in `index.html` before the scripts run. Change this only if you have restructured the page HTML and renamed the container element.
+</ParamField>
+
+<ParamField path="worldsDB" type="string" default="worlds">
+  The name of the IndexedDB database used to persist singleplayer world saves in the browser. Each unique database name is a separate save slot namespace. Players opening two tabs with different `worldsDB` values will have independent world storage.
+</ParamField>
+
+<ParamField path="assetsURI" type="string" required>
+  URL to the `assets.epw` bundle — the EaglercraftX WASM payload and Minecraft asset package. Can be a relative path (e.g. `"assets.epw"`) for same-origin serving, or an absolute URL pointing to a CDN. If you serve `assets.epw` from a different origin, ensure that origin sends `Access-Control-Allow-Origin: *` response headers.
+</ParamField>
+
+<ParamField path="wispUrl" type="string">
+  WebSocket URL of the WISP proxy server used to tunnel connections to Java Minecraft servers. Must begin with `ws://` or `wss://` (use `wss://` on HTTPS pages). If omitted, EB Client falls back to `window.DEFAULT_WISP_URL`. See [WISP Server](/hosting/wisp-server) for setup instructions.
+</ParamField>
+
+---
+
+### Relay configuration
+
+The `relays` array defines the pool of Eaglercraft WebSocket relay servers available in the client's relay picker. Relays are used for **relay-mode** Eaglercraft servers (addresses prefixed with `wss://`), not for standard Java servers.
+
+<ParamField path="relays" type="array">
+  Array of relay objects. Each object has the following shape:
+
+  <ParamField path="relays[].addr" type="string" required>
+    WebSocket URL of the relay server, e.g. `"wss://relay.deev.is/"`.
+  </ParamField>
+
+  <ParamField path="relays[].comment" type="string" required>
+    Human-readable label shown in the relay picker UI, e.g. `"lax1dude relay #1"`.
+  </ParamField>
+
+  <ParamField path="relays[].primary" type="boolean" required>
+    Whether this relay is the initially selected relay. Exactly one relay in the array should have `primary: true`. If multiple entries are `true`, the last one wins.
+  </ParamField>
+</ParamField>
+
+**Default relay pool (built into the source):**
+
+```javascript
+relays: [
+  { addr: "wss://relay.deev.is/",             comment: "lax1dude relay #1",  primary: true  },
+  { addr: "wss://relay.lax1dude.net/",         comment: "lax1dude relay #2",  primary: false },
+  { addr: "wss://relay.shhnowisnottheti.me/",  comment: "ayunami relay #1",   primary: false }
+]
+```
+
+<Tip>
+  You can add private relays to this list alongside the public ones. Players will see all entries in the relay picker and can switch between them at any time.
+</Tip>
+
+---
+
+### Server list pre-population
+
+<ParamField path="servers" type="array">
+  Array of server objects to inject into the in-game server list. These entries are inserted at the **beginning** of the list (via `unshift`) so they appear above any servers the player has added manually.
+
+  Each server object has the following shape:
+
+  <ParamField path="servers[].addr" type="string" required>
+    Server address. Use the `java://` prefix for standard Java Minecraft servers (e.g. `"java://mc.example.com:25565"`) or `wss://` for Eaglercraft relay servers.
+  </ParamField>
+
+  <ParamField path="servers[].name" type="string" required>
+    Display name shown in the server list, e.g. `"My Survival Server"`.
+  </ParamField>
+</ParamField>
+
+```javascript
+servers: [
+  { addr: "java://mc.example.com:25565",    name: "Survival"      },
+  { addr: "java://creative.example.com:25565", name: "Creative"   },
+  { addr: "wss://relay.example.com/",       name: "Relay Server"  }
+]
+```
+
+---
+
+## EpoxyClientOptions — transport layer settings
+
+EB Client uses the **Epoxy** WISP transport library internally. Advanced transport behavior can be tuned via the `epoxyOpts` field of `eaglercraftXOpts` (or passed directly when constructing an `EpoxyClient` instance in custom integrations). These options are rarely needed for standard deployments.
+
+<Note>
+  Most self-hosted deployments do not need to touch any `EpoxyClientOptions`. The defaults work correctly with all standard WISP server implementations. Only adjust these if you are experiencing specific protocol compatibility issues.
+</Note>
+
+<ParamField path="wisp_v2" type="boolean" default="false">
+  Enable WISP v2 protocol extensions. Set to `true` only when your WISP server explicitly supports WISP v2. Mismatched versions will cause connection failures.
+</ParamField>
+
+<ParamField path="udp_extension_required" type="boolean" default="false">
+  Require the WISP server to advertise UDP extension support before connecting. If set to `true` and the server does not support UDP, the connection is rejected.
+</ParamField>
+
+<ParamField path="title_case_headers" type="boolean" default="false">
+  Send HTTP request headers in Title-Case format (e.g. `Content-Type` instead of `content-type`). Some non-compliant upstream proxies require this.
+</ParamField>
+
+<ParamField path="ws_title_case_headers" type="boolean" default="false">
+  Apply title-case header formatting specifically to WebSocket upgrade requests. Independent of `title_case_headers`.
+</ParamField>
+
+<ParamField path="websocket_protocols" type="string[]">
+  Array of WebSocket sub-protocol strings to advertise during the WebSocket handshake with the WISP server.
+</ParamField>
+
+<ParamField path="redirect_limit" type="number">
+  Maximum number of HTTP redirects the Epoxy transport will follow before aborting a request. Defaults to a reasonable platform value.
+</ParamField>
+
+<ParamField path="header_limit" type="number">
+  Maximum number of response headers accepted from the WISP server. Increase if you see header-limit errors with unusual proxy setups.
+</ParamField>
+
+<ParamField path="user_agent" type="string">
+  Custom `User-Agent` string sent with proxied HTTP requests. By default, Epoxy uses its own identifier.
+</ParamField>
+
+<ParamField path="pem_files" type="array">
+  Array of custom PEM certificate files used for TLS validation when connecting through the WISP tunnel. Useful in environments with private certificate authorities.
+</ParamField>
+
+<ParamField path="disable_certificate_validation" type="boolean" default="false">
+  Skip TLS certificate validation for connections proxied through the WISP tunnel. 
+
+  <Warning>
+    Only use this in isolated development or testing environments. Disabling certificate validation exposes connections to man-in-the-middle attacks.
+  </Warning>
+</ParamField>
+
+<ParamField path="buffer_size" type="number">
+  Internal byte buffer size for the Epoxy transport layer. Increasing this can improve throughput on high-latency connections at the cost of memory. Leave at the default unless you have profiled a bottleneck.
+</ParamField>
+
+---
+
+## EpoxyClient API (custom integrations)
+
+If you are building a custom integration on top of EB Client's transport layer, `EpoxyClient` is exposed as a public class:
+
+```javascript
+import { EpoxyClient } from "wispcraft"; // or access via the bundle globals
+
+const client = new EpoxyClient("wss://wisp.example.com/", {
+  wisp_v2: false,
+  disable_certificate_validation: false
+});
+
+// Open a TCP stream to a Minecraft server
+const tcpStream = await client.connect_tcp("mc.example.com:25565");
+
+// Open a TLS stream
+const tlsStream = await client.connect_tls("mc.example.com:25565");
+
+// Open a UDP channel
+const udpChannel = await client.connect_udp("mc.example.com:19132");
+
+// Open a WebSocket through the WISP tunnel
+const ws = await client.connect_websocket(
+  handlers,          // { onopen, onmessage, onclose, onerror }
+  "wss://target.example.com/",
+  ["protocol"],      // sub-protocols
+  {}                 // additional options
+);
+
+// Make an HTTP request through the WISP tunnel
+const response = await client.fetch("https://api.example.com/data", {
+  method: "GET"
+});
+
+// Replace the underlying stream provider at runtime
+client.replace_stream_provider();
+```
+
+---
+
+## Window globals
+
+EB Client exposes several globals on `window` that are useful for runtime inspection and control from the browser console or external scripts.
+
+<ParamField path="window.setWispUrl" type="function">
+  Changes the active WISP endpoint at runtime without reloading the page. Takes a single string argument — the new WebSocket URL.
+
+  ```javascript
+  window.setWispUrl("wss://wisp.example.com/");
+  ```
+</ParamField>
+
+<ParamField path="window.showSettingsUI" type="function">
+  Opens the Wispcraft settings panel in the EB Client UI, allowing the user to change the WISP URL and other transport settings interactively.
+
+  ```javascript
+  window.showSettingsUI();
+  ```
+</ParamField>
+
+<ParamField path="window.DEFAULT_WISP_URL" type="string">
+  The built-in default WISP server URL baked into the current build. Read-only. Useful for logging or resetting to the default after a runtime change.
+
+  ```javascript
+  console.log(window.DEFAULT_WISP_URL);
+  // e.g. "wss://wisp.mercurywork.shop/"
+  ```
+</ParamField>
+
+<ParamField path="window.VERSION" type="string">
+  The EB Client build version string, e.g. `"1.0.0"`. Use this to display version information in a custom UI or to conditionally apply configuration for specific builds.
+</ParamField>
+
+<ParamField path="window.COMMITHASH" type="string">
+  The full git commit hash of the build, e.g. `"a3f8c1d..."`. Useful for bug reports and version pinning.
+</ParamField>
+
+<ParamField path="window.eaglercraftXOpts" type="object">
+  The live configuration object. You can read from this at any time to inspect the active configuration. Mutating fields after boot may not take effect until the relevant subsystem reinitializes.
+</ParamField>
+
+<ParamField path="window.authstore" type="object">
+  The persisted account store containing cached authentication state. Do not modify directly; use the account API methods below.
+</ParamField>
+
+<ParamField path="window.getAuthCode" type="function">
+  Returns the current authentication code for the active session.
+</ParamField>
+
+<ParamField path="window.getLoggedInAccounts" type="function">
+  Returns an array of accounts currently logged in to the client.
+</ParamField>
+
+<ParamField path="window.getLastUsedAccount" type="function">
+  Returns the account object for the most recently used login, or `null` if no account has been used this session.
+</ParamField>
+
+---
+
+## Anura OS environment
+
+EB Client detects the presence of `window.anura` at startup and adjusts its focus and input-handling behavior accordingly when running inside [Anura OS](https://github.com/MercuryWorkshop/anuraOS). No additional configuration is required — the detection is automatic. If you are embedding EB Client as an app inside Anura OS, ensure the frame has the expected `window.anura` global present before the client scripts execute.

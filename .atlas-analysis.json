@@ -1,0 +1,69 @@
+{
+  "projectType": "general",
+  "projectName": "EB Client Archive",
+  "projectDescription": "An archive of EB Client — an offline-capable, browser-based Eaglercraft (Minecraft) client powered by EaglercraftX and Wispcraft, which tunnels connections to Java Minecraft servers via the WISP protocol.",
+  "theme": "aspen",
+  "primaryColor": "#3C82F6",
+  "lightColor": "#60A5FA",
+  "darkColor": "#020817",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guide",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "versions"
+            ]
+          },
+          {
+            "group": "Playing",
+            "pages": [
+              "playing/connecting-to-servers",
+              "playing/microsoft-accounts",
+              "playing/settings"
+            ]
+          },
+          {
+            "group": "Self-Hosting",
+            "pages": [
+              "hosting/overview",
+              "hosting/wisp-server",
+              "hosting/configuration"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Fully offline-capable single-file HTML distribution of Eaglercraft (Minecraft 1.8)",
+    "Wispcraft WISP-protocol tunneling to connect to Java Minecraft servers via WebSockets",
+    "Microsoft / Xbox Live account authentication with device-code OAuth flow",
+    "Multiple relay servers (lax1dude and ayunami relays) for Eaglercraft multiplayer",
+    "Versioned Nextgen releases (CU3 through CU7) plus self-hostable web file bundles",
+    "EaglercraftX runtime with WASM-backed game engine and EPW asset packaging",
+    "Settings UI for configuring WISP server URL and managing Microsoft accounts",
+    "Support for both Java server addresses (java://) and Eaglercraft relay addresses (wss://)"
+  ],
+  "publicApiSurface": [
+    "window.eaglercraftXOpts — configuration object (container, worldsDB, relays, servers)",
+    "eaglercraftXOpts.assetsURI — URL or data URI for the EPW asset bundle",
+    "eaglercraftXOpts.container — DOM element ID for the game canvas",
+    "window.setWispUrl(url) — override the active WISP server URL at runtime",
+    "window.showSettingsUI() — programmatically open the Wispcraft settings panel",
+    "window.getAuthCode() — retrieve the current Microsoft auth device code flow data",
+    "window.getLoggedInAccounts() — list stored Microsoft accounts",
+    "window.getLastUsedAccount() — retrieve the most-recently-used account",
+    "window.DEFAULT_WISP_URL — the default WISP relay endpoint",
+    "window.VERSION — current EB Client build version string",
+    "window.COMMITHASH — build commit hash identifier",
+    "EpoxyClient — WebAssembly WISP transport client with connect_tcp, connect_tls, connect_udp, connect_websocket, fetch methods",
+    "EpoxyClientOptions — configuration for EpoxyClient (wisp_v2, udp_extension_required, title_case_headers, websocket_protocols, redirect_limit, header_limit, user_agent, pem_files, disable_certificate_validation, buffer_size)",
+    "EpoxyWebSocket — WISP-backed WebSocket abstraction (send, close)",
+    "Relay configuration: { addr, comment, primary } objects in eaglercraftXOpts.relays"
+  ]
+}

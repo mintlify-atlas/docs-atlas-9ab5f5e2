@@ -1,47 +1,145 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Get started with EB Client in your browser"
+sidebarTitle: "Quickstart"
+description: "Launch EB Client Nextgen CU7 in minutes — download the offline HTML file or deploy the web bundle, then connect to any Java Minecraft 1.8 server via WISP."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+EB Client requires no installer, no Java runtime, and no account to start playing. The fastest path is downloading the single offline HTML file and opening it directly in your browser. If you want to host the client for others or benefit from asset caching, the web file bundle is the better choice. Both approaches are covered below.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+<Note>
+  **Browser requirement:** EB Client uses WebAssembly (WASM) to run the Minecraft 1.8 engine. Any modern browser released after 2019 supports WASM — this includes Chrome 57+, Firefox 52+, Safari 11+, and Edge 16+. If your browser can run Google Docs, it can run EB Client.
+</Note>
 
-## Prerequisites
+## Option A — Offline HTML File (Recommended for Most Users)
 
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+This is the simplest path. The entire client is packed into one `.html` file that you download once and open locally, with no internet connection required after the initial download.
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Download the offline HTML file">
+    Grab the latest release from the `Offline Downloads` folder in the archive:
 
-    ```bash
-    npm install your-package
     ```
+    Offline Downloads/[LATEST] EB Client Nextgen CU7.html
+    ```
+
+    Save it anywhere convenient — your desktop, a USB drive, or a dedicated folder. The file is large because it embeds the full asset pack inside the HTML.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
-    ```bash
-    your-cli init
-    ```
+  <Step title="Open the file in your browser">
+    Double-click the downloaded `.html` file, or drag it onto an open browser window. You can also navigate to it manually:
+
+    <Tabs>
+      <Tab title="Chrome / Edge">
+        Press <kbd>Ctrl</kbd>+<kbd>O</kbd> (Windows/Linux) or <kbd>⌘</kbd>+<kbd>O</kbd> (macOS), then select the `.html` file.
+      </Tab>
+      <Tab title="Firefox">
+        Press <kbd>Ctrl</kbd>+<kbd>O</kbd> (Windows/Linux) or <kbd>⌘</kbd>+<kbd>O</kbd> (macOS), then select the `.html` file. Firefox may display a security prompt for local files — click **Allow** to continue.
+      </Tab>
+      <Tab title="Safari">
+        Use **File → Open File…** from the menu bar and select the `.html` file.
+      </Tab>
+    </Tabs>
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
 
-    ```bash
-    your-cli start
+  <Step title="Wait for the loading screen to complete">
+    The first time you open the file the engine initialises and decompresses the asset pack from the embedded data. This typically takes **5 – 20 seconds** depending on your hardware. You will see a progress bar on a dark loading screen. Do not close the tab during this step.
+
+    <Tip>
+      Subsequent loads of the same file are faster because your browser caches the parsed WASM module. The very first load is always the slowest.
+    </Tip>
+  </Step>
+
+  <Step title="Add a Microsoft account (optional)">
+    After loading you will land on the main menu. EB Client supports Microsoft account authentication so your in-game skin, username, and multiplayer profile match your purchased Minecraft account.
+
+    To add an account:
+    1. Click **Settings** on the main menu (or press <kbd>Esc</kbd> from inside a world).
+    2. Navigate to **Accounts**.
+    3. Click **Add Microsoft Account** and follow the device-code authentication flow displayed on screen.
+    4. Once authenticated, select the account as your active profile.
+
+    <Note>
+      Adding a Microsoft account is entirely optional. You can play on servers that do not require online-mode authentication without linking any account.
+    </Note>
+  </Step>
+
+  <Step title="Join your first server">
+    From the main menu, click **Multiplayer**. EB Client uses a custom address scheme to distinguish Java servers (routed via WISP) from Eaglercraft relay servers.
+
+    **Connecting to a Java Minecraft server:**
     ```
+    java://play.example.net:25565
+    ```
+    Use the `java://` prefix followed by the server's hostname or IP and port. The client will tunnel this connection through the configured WISP proxy automatically.
+
+    **Connecting to an Eaglercraft relay server:**
+    ```
+    wss://relay.deev.is/
+    ```
+    Paste the full `wss://` WebSocket URL directly. Three relays are built into the client and ready to use:
+
+    | Relay | Address |
+    |---|---|
+    | lax1dude relay #1 | `wss://relay.deev.is/` |
+    | lax1dude relay #2 | `wss://relay.lax1dude.net/` |
+    | ayunami relay #1 | `wss://relay.shhnowisnottheti.me/` |
+
+    Click **Join Server** once you have entered the address. The WISP proxy will establish the connection and you will load into the server normally.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+---
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+## Option B — Web File Bundle (For Hosting)
+
+Use the web file bundle if you want to host EB Client on a web server, a static hosting provider (Netlify, GitHub Pages, Cloudflare Pages, etc.), or your own infrastructure. The split format lets browsers cache the heavy `assets.epw` file independently, so returning visitors load much faster.
+
+<Steps>
+  <Step title="Grab the web file bundle">
+    Copy the entire contents of the latest web bundle folder from the archive:
+
+    ```
+    Web Files/[LATEST] EB Client Nextgen CU7/
+    ├── index.html
+    ├── bootstrap.js
+    ├── assets.epw
+    └── favicon.png
+    ```
+
+    All four files must be kept in the same directory. Do not rename them — `bootstrap.js` and `assets.epw` are referenced by hard-coded paths in `index.html`.
+  </Step>
+
+  <Step title="Serve the folder from a web server">
+    Upload the four files to the root (or a sub-directory) of your hosting provider. Any static file host works. Example using a local Python server for testing:
+
+    ```bash
+    # Python 3 — run from inside the bundle folder
+    python3 -m http.server 8080
+    ```
+
+    Then open `http://localhost:8080` in your browser.
+
+    <Warning>
+      Do **not** open `index.html` as a `file://` URL when using the web bundle — relative asset loading requires an HTTP/HTTPS origin. Use the offline HTML file instead if you need local `file://` access.
+    </Warning>
+  </Step>
+
+  <Step title="Open the hosted URL and proceed">
+    Navigate to your hosted URL. From this point the experience is identical to the offline HTML approach: wait for the loading screen, optionally add a Microsoft account, and join a server using a `java://` or `wss://` address as described in Option A.
+  </Step>
+</Steps>
+
+---
+
+## Changing the WISP Proxy Server
+
+The client ships with a default public WISP endpoint. If that endpoint is unavailable or you want to use your own proxy, you can change it at any time without restarting:
+
+1. Press <kbd>Esc</kbd> to open the in-game menu (or click **Settings** on the main menu).
+2. Go to **Settings → WISP Server**.
+3. Enter the full `wss://` URL of your WISP server.
+4. Click **Save**. The new proxy will be used for all subsequent `java://` connections.
+
+<Tip>
+  You can self-host a WISP proxy server to reduce latency or avoid reliance on public infrastructure. Any server implementing the open WISP protocol specification is compatible with EB Client.
 </Tip>

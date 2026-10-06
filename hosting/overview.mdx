@@ -1,0 +1,113 @@
+---
+title: "Self-host EB Client on your own web server"
+sidebarTitle: "Overview"
+description: "Deploy EB Client on any static web server using either the all-in-one offline HTML file or the multi-file web bundle with bootstrap.js and assets.epw."
+---
+
+EB Client can be hosted on any web server that can serve static files — no server-side runtime, database, or build step required. There are two deployment formats to choose from depending on your use case: a single self-contained HTML file for the simplest possible setup, or a multi-file web bundle that separates the loader from the asset package for better cacheability and performance.
+
+## Deployment formats
+
+<CardGroup cols={2}>
+  <Card title="Offline HTML file" icon="file-code">
+    A single `.html` file with all assets inlined. Drop it anywhere — a local folder, a USB drive, a GitHub Pages repo, or any web host. No build tools, no configuration.
+  </Card>
+  <Card title="Multi-file web bundle" icon="folder-open">
+    A directory containing `index.html`, `bootstrap.js`, `assets.epw`, and `favicon.png`. Best for production hosting where you want browser caching and version control over each asset separately.
+  </Card>
+</CardGroup>
+
+### When to use each format
+
+| | Offline HTML file | Multi-file web bundle |
+|---|---|---|
+| **Portability** | ✅ Single file, works offline | ❌ Requires a web server |
+| **Browser caching** | ❌ Entire file re-downloaded on update | ✅ Assets cached independently |
+| **Customization** | ✅ Edit in any text editor | ✅ Edit `index.html` directly |
+| **Best for** | Personal use, quick sharing | Production servers, CDN hosting |
+
+<Note>
+  The offline HTML file is the simplest option for personal use. Just download it, open it in a browser, and play — no server or configuration needed. The multi-file bundle is recommended when you are hosting for multiple users or want finer control over caching behavior.
+</Note>
+
+## Multi-file bundle structure
+
+Every versioned web bundle contains exactly four files:
+
+| File | Purpose |
+|---|---|
+| `index.html` | Entry point HTML page; contains the `eaglercraftXOpts` configuration object |
+| `bootstrap.js` | Loader bootstrap — handles base64 decoding, asset fetching, load sequencing, and in-page error display |
+| `assets.epw` | EaglercraftX WASM game payload and asset package (EaglercraftX loader, compiled WASM classes, and EPK asset archives) |
+| `favicon.png` | Client favicon |
+
+The `bootstrap.js` loader fetches `assets.epw` via the browser Fetch API with `cache: 'force-cache'`, so returning visitors load instantly from disk. Load progress and any errors are displayed directly on the page — no browser console required.
+
+## Quick setup with the web bundle
+
+<Steps>
+  <Step title="Download the web bundle">
+    Grab the latest versioned bundle from the EB Client releases page. You will receive a directory (or zip archive) containing `index.html`, `bootstrap.js`, `assets.epw`, and `favicon.png`. Extract it to a folder on your server.
+  </Step>
+  <Step title="Serve the directory with any static HTTP server">
+    Point any static file server at the bundle directory. A few quick options:
+
+    <Tabs>
+      <Tab title="Python">
+        ```bash
+        # Python 3 — serves on http://localhost:8080
+        python3 -m http.server 8080
+        ```
+      </Tab>
+      <Tab title="Node.js (serve)">
+        ```bash
+        # Install once, then run from the bundle directory
+        npx serve -l 8080 .
+        ```
+      </Tab>
+      <Tab title="Caddy">
+        ```caddyfile
+        # Caddyfile — automatic HTTPS on a real domain
+        ebclient.example.com {
+          root * /var/www/ebclient
+          file_server
+        }
+        ```
+      </Tab>
+      <Tab title="Nginx">
+        ```nginx
+        server {
+          listen 80;
+          server_name ebclient.example.com;
+          root /var/www/ebclient;
+          index index.html;
+
+          location / {
+            try_files $uri $uri/ =404;
+          }
+        }
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Open in a browser">
+    Navigate to your server's URL (e.g. `http://localhost:8080`). The bootstrap loader will fetch `assets.epw`, decode the payload, and launch the Eaglercraft game canvas. The first load may take a few seconds depending on your connection; subsequent loads are served from the browser cache.
+  </Step>
+</Steps>
+
+## CORS considerations
+
+Because all four bundle files are served from the same origin (same scheme, host, and port), **no CORS headers are required**. The `bootstrap.js` loader fetches `assets.epw` relative to the page URL, so same-origin policy is satisfied automatically.
+
+If you ever serve `assets.epw` from a separate CDN domain, you will need to add a `Access-Control-Allow-Origin: *` header on the CDN responses. For most self-hosted setups this is unnecessary.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="WISP Server" icon="server" href="/hosting/wisp-server">
+    Set up your own WISP proxy so players can connect to traditional Java Minecraft servers through the WebSocket tunnel.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/hosting/configuration">
+    Customize `eaglercraftXOpts` to set a default WISP server, pre-populate the server list, configure relays, and tune transport options.
+  </Card>
+</CardGroup>

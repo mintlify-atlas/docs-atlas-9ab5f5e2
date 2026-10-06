@@ -1,0 +1,135 @@
+---
+title: "Configure EB Client with the Wispcraft settings panel"
+sidebarTitle: "Settings"
+description: "A complete reference for the Wispcraft settings panel — WISP server URL, Microsoft account management, the About tab, and JavaScript APIs for programmatic control."
+---
+
+The **Wispcraft settings panel** is the central configuration interface for EB Client. It lets you change the WISP server used to tunnel Java Edition connections, manage your stored Microsoft accounts, and review connection-type guidance. The panel is always accessible from the EB Client page UI and can also be opened programmatically from the browser console.
+
+<Note>
+  All settings — including the WISP server URL and stored Microsoft account tokens — are persisted in the browser's **local storage**. They survive page reloads and browser restarts but are scoped to the current origin. Clearing your browser's site data will reset everything to defaults.
+</Note>
+
+## Opening the Settings Panel
+
+Click the **Settings** button in the EB Client page UI at any time to open the panel.
+
+Alternatively, open the panel from the browser's developer console (`F12` → Console tab):
+
+```javascript
+window.showSettingsUI();
+```
+
+The panel overlays the client and has two tabs: **Settings** and **About**.
+
+---
+
+## Settings Tab
+
+The **Settings** tab contains all configurable options.
+
+### WISP Server URL
+
+The WISP server is the WebSocket relay that tunnels your `java://` connections to Java Edition Minecraft servers. The URL field shows the currently active WISP server.
+
+<CardGroup cols={2}>
+  <Card title="Default Value" icon="globe">
+    The default WISP server URL is stored in `window.DEFAULT_WISP_URL`. It is baked into the page at build time and reflects the deployment's recommended server.
+  </Card>
+  <Card title="Custom Server" icon="server">
+    Enter any valid `wss://` WebSocket URL to route Java Edition connections through your own WISP server or an alternative public instance.
+  </Card>
+</CardGroup>
+
+To read or change the WISP URL from the browser console without opening the UI:
+
+```javascript
+// Read the current default WISP URL
+console.log(window.DEFAULT_WISP_URL);
+
+// Switch to a different WISP server at runtime
+window.setWispUrl("wss://your-wisp-server.example.com/");
+```
+
+<Warning>
+  `window.setWispUrl()` changes the server for the current page session immediately. Active connections are not automatically renegotiated — reconnect to your server after changing this value.
+</Warning>
+
+Changes made through the UI input field are saved to local storage and take effect for all subsequent connections.
+
+---
+
+### Microsoft Accounts
+
+The Microsoft Accounts section of the Settings tab lets you manage every Xbox Live / Microsoft account stored in EB Client.
+
+<Steps>
+  <Step title="View Stored Accounts">
+    The **account dropdown** lists every account currently saved in local storage. Select any entry to make it the active account.
+  </Step>
+  <Step title="Add an Account">
+    Click **Add** to start the device-code OAuth flow. A QR code, verification URL, and one-time code are displayed. Scan the QR code or visit the URL on any device to approve sign-in.
+
+    See [Microsoft Accounts](/playing/microsoft-accounts) for the full step-by-step walkthrough.
+  </Step>
+  <Step title="Remove an Account">
+    Select the account to remove from the dropdown, then click **Remove**. The account and its stored tokens are deleted from local storage immediately.
+  </Step>
+</Steps>
+
+The active account's display name and status are shown below the dropdown once authentication is complete.
+
+#### Console APIs for Account Management
+
+```javascript
+// List all accounts currently stored in EB Client
+window.getLoggedInAccounts();
+
+// Get the account most recently used to start a session
+window.getLastUsedAccount();
+
+// Inspect in-progress device-code flow data
+window.getAuthCode();
+```
+
+---
+
+## About Tab
+
+The **About** tab does not contain editable settings. It provides a quick reference for the two connection types supported by EB Client:
+
+<CardGroup cols={2}>
+  <Card title="Java Edition Servers" icon="java">
+    Prefix the server address with `java://` to connect to a standard Java Edition Minecraft server via the WISP tunnel.
+
+    ```text
+    java://mc.hypixel.net:25565
+    ```
+  </Card>
+  <Card title="Eaglercraft Relay Servers" icon="wifi">
+    Start the address with `wss://` to connect directly to an Eaglercraft-compatible relay server.
+
+    ```text
+    wss://relay.deev.is/
+    ```
+  </Card>
+</CardGroup>
+
+This information mirrors the guidance in [Connecting to Servers](/playing/connecting-to-servers) and is available in-client so you never need to leave the page to look it up.
+
+---
+
+## Full API Reference
+
+| Function | Description |
+|---|---|
+| `window.showSettingsUI()` | Opens the Wispcraft settings panel programmatically. |
+| `window.setWispUrl(url)` | Changes the active WISP server URL at runtime. Accepts a `wss://` WebSocket URL string. |
+| `window.DEFAULT_WISP_URL` | Read-only. The default WISP server URL set at build time. |
+| `window.getLoggedInAccounts()` | Returns an array of all stored Microsoft account objects. |
+| `window.getLastUsedAccount()` | Returns the account object most recently used to authenticate. |
+| `window.getAuthCode()` | Returns the current device-code flow payload if a sign-in is in progress, otherwise `null`. |
+
+<Tip>
+  All `window.*` APIs are available from the browser's developer console (`F12` → Console). They are useful for debugging authentication issues or scripting server configuration without interacting with the UI.
+</Tip>
