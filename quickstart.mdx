@@ -7,7 +7,7 @@ description: "Launch EB Client Nextgen CU7 in minutes — download the offline H
 EB Client requires no installer, no Java runtime, and no account to start playing. The fastest path is downloading the single offline HTML file and opening it directly in your browser. If you want to host the client for others or benefit from asset caching, the web file bundle is the better choice. Both approaches are covered below.
 
 <Note>
-  **Browser requirement:** EB Client uses WebAssembly (WASM) to run the Minecraft 1.8 engine. Any modern browser released after 2019 supports WASM — this includes Chrome 57+, Firefox 52+, Safari 11+, and Edge 16+. If your browser can run Google Docs, it can run EB Client.
+  **Browser requirement:** EB Client uses WebAssembly (WASM) to run the Minecraft 1.8 engine. Any modern browser with WebAssembly support is compatible — if your browser is reasonably up to date, it will work.
 </Note>
 
 ## Option A — Offline HTML File (Recommended for Most Users)
@@ -50,13 +50,7 @@ This is the simplest path. The entire client is packed into one `.html` file tha
   </Step>
 
   <Step title="Add a Microsoft account (optional)">
-    After loading you will land on the main menu. EB Client supports Microsoft account authentication so your in-game skin, username, and multiplayer profile match your purchased Minecraft account.
-
-    To add an account:
-    1. Click **Settings** on the main menu (or press <kbd>Esc</kbd> from inside a world).
-    2. Navigate to **Accounts**.
-    3. Click **Add Microsoft Account** and follow the device-code authentication flow displayed on screen.
-    4. Once authenticated, select the account as your active profile.
+    After loading you will land on the main menu. EB Client supports Microsoft account authentication via device-code OAuth, so your in-game skin, username, and multiplayer profile match your purchased Minecraft account. The account login option is accessible from within the client settings UI.
 
     <Note>
       Adding a Microsoft account is entirely optional. You can play on servers that do not require online-mode authentication without linking any account.
@@ -99,7 +93,7 @@ Use the web file bundle if you want to host EB Client on a web server, a static 
     Copy the entire contents of the latest web bundle folder from the archive:
 
     ```
-    Web Files/[LATEST] EB Client Nextgen CU7/
+    Web Files (If you want to host yourself)/[LATEST] EB Client Nextgen CU7/
     ├── index.html
     ├── bootstrap.js
     ├── assets.epw
@@ -133,12 +127,7 @@ Use the web file bundle if you want to host EB Client on a web server, a static 
 
 ## Changing the WISP Proxy Server
 
-The client ships with a default public WISP endpoint. If that endpoint is unavailable or you want to use your own proxy, you can change it at any time without restarting:
-
-1. Press <kbd>Esc</kbd> to open the in-game menu (or click **Settings** on the main menu).
-2. Go to **Settings → WISP Server**.
-3. Enter the full `wss://` URL of your WISP server.
-4. Click **Save**. The new proxy will be used for all subsequent `java://` connections.
+The client ships with a default public WISP endpoint. If that endpoint is unavailable or you want to use your own proxy, you can update it from within the client settings UI. Look for the WISP server option in the settings screen, enter the full `wss://` URL of your WISP server, and save. The new proxy will be used for all subsequent `java://` connections.
 
 <Tip>
   You can self-host a WISP proxy server to reduce latency or avoid reliance on public infrastructure. Any server implementing the open WISP protocol specification is compatible with EB Client.

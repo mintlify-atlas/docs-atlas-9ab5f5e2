@@ -13,7 +13,7 @@ EB Client can be hosted on any web server that can serve static files — no ser
     A single `.html` file with all assets inlined. Drop it anywhere — a local folder, a USB drive, a GitHub Pages repo, or any web host. No build tools, no configuration.
   </Card>
   <Card title="Multi-file web bundle" icon="folder-open">
-    A directory containing `index.html`, `bootstrap.js`, `assets.epw`, and `favicon.png`. Best for production hosting where you want browser caching and version control over each asset separately.
+    A directory containing `index.html`, `bootstrap.js`, and `assets.epw` (plus `favicon.png` in some versions). Best for production hosting where you want browser caching and version control over each asset separately.
   </Card>
 </CardGroup>
 
@@ -32,14 +32,14 @@ EB Client can be hosted on any web server that can serve static files — no ser
 
 ## Multi-file bundle structure
 
-Every versioned web bundle contains exactly four files:
+Every versioned web bundle contains at minimum three files, with an optional fourth in some versions:
 
 | File | Purpose |
 |---|---|
 | `index.html` | Entry point HTML page; contains the `eaglercraftXOpts` configuration object |
 | `bootstrap.js` | Loader bootstrap — handles base64 decoding, asset fetching, load sequencing, and in-page error display |
 | `assets.epw` | EaglercraftX WASM game payload and asset package (EaglercraftX loader, compiled WASM classes, and EPK asset archives) |
-| `favicon.png` | Client favicon |
+| `favicon.png` | Client favicon (present in CU7 and later; may be absent in older bundles) |
 
 The `bootstrap.js` loader fetches `assets.epw` via the browser Fetch API with `cache: 'force-cache'`, so returning visitors load instantly from disk. Load progress and any errors are displayed directly on the page — no browser console required.
 
@@ -47,7 +47,7 @@ The `bootstrap.js` loader fetches `assets.epw` via the browser Fetch API with `c
 
 <Steps>
   <Step title="Download the web bundle">
-    Grab the latest versioned bundle from the EB Client releases page. You will receive a directory (or zip archive) containing `index.html`, `bootstrap.js`, `assets.epw`, and `favicon.png`. Extract it to a folder on your server.
+    Grab the latest versioned bundle from the EB Client releases page. You will receive a directory (or zip archive) containing `index.html`, `bootstrap.js`, and `assets.epw` (some versions also include `favicon.png`). Extract it to a folder on your server.
   </Step>
   <Step title="Serve the directory with any static HTTP server">
     Point any static file server at the bundle directory. A few quick options:
@@ -97,7 +97,7 @@ The `bootstrap.js` loader fetches `assets.epw` via the browser Fetch API with `c
 
 ## CORS considerations
 
-Because all four bundle files are served from the same origin (same scheme, host, and port), **no CORS headers are required**. The `bootstrap.js` loader fetches `assets.epw` relative to the page URL, so same-origin policy is satisfied automatically.
+Because all bundle files are served from the same origin (same scheme, host, and port), **no CORS headers are required**. The `bootstrap.js` loader fetches `assets.epw` relative to the page URL, so same-origin policy is satisfied automatically.
 
 If you ever serve `assets.epw` from a separate CDN domain, you will need to add a `Access-Control-Allow-Origin: *` header on the CDN responses. For most self-hosted setups this is unnecessary.
 

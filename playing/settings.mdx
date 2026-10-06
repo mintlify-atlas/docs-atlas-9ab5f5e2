@@ -1,7 +1,7 @@
 ---
 title: "Configure EB Client with the Wispcraft settings panel"
 sidebarTitle: "Settings"
-description: "A complete reference for the Wispcraft settings panel — WISP server URL, Microsoft account management, the About tab, and JavaScript APIs for programmatic control."
+description: "Reference for the Wispcraft settings panel: configure the WISP server URL, manage Microsoft accounts, and use the JavaScript console APIs."
 ---
 
 The **Wispcraft settings panel** is the central configuration interface for EB Client. It lets you change the WISP server used to tunnel Java Edition connections, manage your stored Microsoft accounts, and review connection-type guidance. The panel is always accessible from the EB Client page UI and can also be opened programmatically from the browser console.
@@ -68,12 +68,12 @@ The Microsoft Accounts section of the Settings tab lets you manage every Xbox Li
     The **account dropdown** lists every account currently saved in local storage. Select any entry to make it the active account.
   </Step>
   <Step title="Add an Account">
-    Click **Add** to start the device-code OAuth flow. A QR code, verification URL, and one-time code are displayed. Scan the QR code or visit the URL on any device to approve sign-in.
+    Click **Add an account** to start the device-code OAuth flow. A QR code, verification URL, and one-time code are displayed. Scan the QR code or visit the URL on any device to approve sign-in.
 
     See [Microsoft Accounts](/playing/microsoft-accounts) for the full step-by-step walkthrough.
   </Step>
   <Step title="Remove an Account">
-    Select the account to remove from the dropdown, then click **Remove**. The account and its stored tokens are deleted from local storage immediately.
+    Select the account to remove from the dropdown, then click **Remove account**. The account and its stored tokens are deleted from local storage immediately.
   </Step>
 </Steps>
 
@@ -129,6 +129,9 @@ This information mirrors the guidance in [Connecting to Servers](/playing/connec
 | `window.getLoggedInAccounts()` | Returns an array of all stored Microsoft account objects. |
 | `window.getLastUsedAccount()` | Returns the account object most recently used to authenticate. |
 | `window.getAuthCode()` | Returns the current device-code flow payload if a sign-in is in progress, otherwise `null`. |
+| `window.authstore` | The persisted account store object containing all saved Microsoft account data. |
+| `window.VERSION` | Read-only. The version string for the running EB Client build. |
+| `window.COMMITHASH` | Read-only. The commit hash identifying the exact build. |
 
 <Tip>
   All `window.*` APIs are available from the browser's developer console (`F12` → Console). They are useful for debugging authentication issues or scripting server configuration without interacting with the UI.

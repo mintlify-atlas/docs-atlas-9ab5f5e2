@@ -1,7 +1,7 @@
 ---
-title: "Sign in with a Microsoft account in EB Client"
+title: "Microsoft Account sign-in and authentication in EB Client"
 sidebarTitle: "Microsoft Accounts"
-description: "Add a Microsoft/Xbox Live account to EB Client using device-code OAuth, switch between multiple stored accounts, and resolve common XSTS authentication errors."
+description: "Add and manage Microsoft accounts in EB Client with device-code OAuth, switch stored profiles, and troubleshoot XSTS authentication errors."
 ---
 
 EB Client supports Microsoft account authentication, allowing you to play on online-mode Java Edition servers as your legitimate Minecraft account. Authentication uses Microsoft's **device-code OAuth flow** — because EB Client runs entirely in the browser, it cannot open a pop-up login window, so you approve the sign-in on a separate device or tab instead. Once authenticated, your account credentials are stored locally in the browser so you can return without re-authenticating each session.
@@ -23,10 +23,10 @@ EB Client supports Microsoft account authentication, allowing you to play on onl
     The Wispcraft settings panel will appear.
   </Step>
   <Step title="Navigate to Microsoft Accounts">
-    In the **Settings** tab, locate the **Microsoft Accounts** section. You will see a dropdown listing any accounts already stored, along with **Add** and **Remove** buttons.
+    In the **Settings** tab, locate the **Microsoft Accounts** section. You will see a dropdown listing any accounts already stored, along with **Add an account** and **Remove account** buttons.
   </Step>
   <Step title="Start the Device-Code Flow">
-    Click **Add**. EB Client contacts Microsoft's OAuth2 device-code endpoint:
+    Click **Add an account**. EB Client contacts Microsoft's OAuth2 device-code endpoint:
 
     ```
     https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode
@@ -36,11 +36,10 @@ EB Client supports Microsoft account authentication, allowing you to play on onl
   </Step>
   <Step title="Authenticate on Microsoft's Website">
     The settings panel displays:
-    - A **QR code** you can scan with your phone
-    - A **verification URL** (e.g. `https://microsoft.com/devicelogin`)
-    - A **one-time code** to enter on that page
+    - A **QR code** (generated as an SVG) you can scan with your phone
+    - A **verification URL** in the form `https://microsoft.com/link?otc=<code>`
 
-    Open the URL on any device — your phone, another browser tab, or a separate computer — enter the code, and sign in with your Microsoft account.
+    Open the URL on any device — your phone, another browser tab, or a separate computer — and sign in with your Microsoft account to approve the request.
   </Step>
   <Step title="Wait for Confirmation">
     EB Client polls Microsoft in the background. Once you complete sign-in, the client automatically exchanges the Microsoft access token through the full authentication chain:
@@ -62,7 +61,7 @@ The complete token exchange happens entirely client-side inside the browser:
 
 ```
 1. Device-code request  →  login.microsoftonline.com
-2. User approves login  →  microsoft.com/devicelogin
+2. User approves login  →  microsoft.com/link
 3. Poll for token       →  login.microsoftonline.com (OAuth2 token endpoint)
 4. Authenticate to XBL  →  user.auth.xboxlive.com
 5. Exchange XSTS token  →  xsts.auth.xboxlive.com
@@ -94,7 +93,7 @@ window.getAuthCode();
 
 ### Removing an Account
 
-Select the account you wish to remove from the dropdown, then click **Remove**. The account's stored tokens are deleted from the browser's local storage immediately.
+Select the account you wish to remove from the dropdown, then click **Remove account**. The account's stored tokens are deleted from the browser's local storage immediately.
 
 <Warning>
   Removing an account is permanent within EB Client. You will need to go through the device-code flow again to re-add it.

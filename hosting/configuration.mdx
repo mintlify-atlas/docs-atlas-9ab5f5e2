@@ -1,7 +1,7 @@
 ---
 title: "Configure eaglercraftXOpts for a custom EB Client deployment"
 sidebarTitle: "Configuration"
-description: "Full reference for every eaglercraftXOpts field, relay and server objects, EpoxyClientOptions transport settings, and the window globals exposed by EB Client."
+description: "Full reference for eaglercraftXOpts fields, relay and server objects, internal transport layer options, and the window globals exposed by EB Client."
 ---
 
 All EB Client behavior is controlled by the `window.eaglercraftXOpts` object defined in `index.html`. Setting this object before the page scripts run lets you pre-configure the WISP server, default server list, relay pool, asset location, and low-level transport options for every player who loads your deployment.
@@ -76,7 +76,7 @@ The `relays` array defines the pool of Eaglercraft WebSocket relay servers avail
   </ParamField>
 
   <ParamField path="relays[].primary" type="boolean" required>
-    Whether this relay is the initially selected relay. Exactly one relay in the array should have `primary: true`. If multiple entries are `true`, the last one wins.
+    Whether this relay is the initially selected relay. Exactly one relay in the array should have `primary: true`. Which relay is `primary` is set at build time — in the default configuration this is `lax1dude relay #1`.
   </ParamField>
 </ParamField>
 
@@ -122,12 +122,12 @@ servers: [
 
 ---
 
-## EpoxyClientOptions — transport layer settings
+## Epoxy transport layer — internal options
 
-EB Client uses the **Epoxy** WISP transport library internally. Advanced transport behavior can be tuned via the `epoxyOpts` field of `eaglercraftXOpts` (or passed directly when constructing an `EpoxyClient` instance in custom integrations). These options are rarely needed for standard deployments.
+EB Client uses the **Epoxy** WISP transport library internally to handle all WISP connections. The following options reflect the internal `EpoxyClientOptions` settings that Wispcraft configures automatically. They are documented here for reference and for diagnosing protocol compatibility issues — standard self-hosted deployments will not need to change any of these values.
 
 <Note>
-  Most self-hosted deployments do not need to touch any `EpoxyClientOptions`. The defaults work correctly with all standard WISP server implementations. Only adjust these if you are experiencing specific protocol compatibility issues.
+  Self-hosters configure EB Client via `eaglercraftXOpts` and `window.setWispUrl()`. The Epoxy transport layer (`EpoxyClient`, `EpoxyClientOptions`, `EpoxyHandlers`) is an internal WASM-backed component managed by Wispcraft — it is not intended for direct instantiation or use by self-hosters.
 </Note>
 
 <ParamField path="wisp_v2" type="boolean" default="false">
@@ -180,43 +180,16 @@ EB Client uses the **Epoxy** WISP transport library internally. Advanced transpo
 
 ---
 
-## EpoxyClient API (custom integrations)
+## Epoxy transport layer — internal classes
 
-If you are building a custom integration on top of EB Client's transport layer, `EpoxyClient` is exposed as a public class:
+The Epoxy transport library is the internal engine that Wispcraft uses to multiplex WISP connections. For reference, the main internal classes are:
 
-```javascript
-import { EpoxyClient } from "wispcraft"; // or access via the bundle globals
+- **`EpoxyClient`** — core WISP client. Takes a WISP URL and an `EpoxyClientOptions` instance. Exposes methods `connect_tcp`, `connect_tls`, `connect_udp`, `connect_websocket`, `fetch`, and `replace_stream_provider`.
+- **`EpoxyClientOptions`** — configuration object for `EpoxyClient`. Fields are documented in the section above.
+- **`EpoxyHandlers`** — callback container required by `connect_websocket`. Constructed with four callbacks: `onopen`, `onclose`, `onerror`, `onmessage`.
+- **`EpoxyWebSocket`** — WebSocket handle returned by `connect_websocket`. Supports `.send(data)` and `.close(code, reason)`.
 
-const client = new EpoxyClient("wss://wisp.example.com/", {
-  wisp_v2: false,
-  disable_certificate_validation: false
-});
-
-// Open a TCP stream to a Minecraft server
-const tcpStream = await client.connect_tcp("mc.example.com:25565");
-
-// Open a TLS stream
-const tlsStream = await client.connect_tls("mc.example.com:25565");
-
-// Open a UDP channel
-const udpChannel = await client.connect_udp("mc.example.com:19132");
-
-// Open a WebSocket through the WISP tunnel
-const ws = await client.connect_websocket(
-  handlers,          // { onopen, onmessage, onclose, onerror }
-  "wss://target.example.com/",
-  ["protocol"],      // sub-protocols
-  {}                 // additional options
-);
-
-// Make an HTTP request through the WISP tunnel
-const response = await client.fetch("https://api.example.com/data", {
-  method: "GET"
-});
-
-// Replace the underlying stream provider at runtime
-client.replace_stream_provider();
-```
+These classes are part of the internal WASM module loaded by Wispcraft and are **not directly accessible or intended for use by self-hosters**. All user-facing configuration goes through `eaglercraftXOpts` and the `window` globals documented below. The internal classes are listed here solely for reference.
 
 ---
 
